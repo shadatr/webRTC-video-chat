@@ -9,8 +9,13 @@ const Page = ({ params }: { params: { id: string } }) => {
   const { ws, me, stream, peers } = useContext(RoomContext);
 
   useEffect(() => {
-    if (me) ws.emit("join-room", { roomId: params.id, peerId: me._id });
-  }, [ws, me, params.id]);
+    if (stream && me) {
+      console.log("Joining room", stream);
+      console.log("Joining room peers", peers);
+      ws.emit("join-room", { roomId: params.id, peerId: me.id, stream });
+    }
+  }, [ws, me, params.id, stream]);
+  
 
   return (
     <div>

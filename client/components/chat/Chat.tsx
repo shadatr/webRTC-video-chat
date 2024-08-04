@@ -13,7 +13,7 @@ export const Chat: React.FC = () => {
             data-testid="chat"
         >
             <div>
-                {chat.messages.map((message: IMessage) => (
+                {chat.messages?.map((message: IMessage) => (
                     <ChatBubble
                         message={message}
                         key={

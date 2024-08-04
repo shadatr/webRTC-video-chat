@@ -3,7 +3,7 @@ import { RoomContext } from '@/context/RoomContext';
 import React, { useContext } from 'react'
 
 const JoinButton = () => {
-    const ws = useContext(RoomContext);
+    const {ws} = useContext(RoomContext);
     const joinRoom = () => {
       if (ws) {
         ws.emit('join-room');
@@ -13,7 +13,7 @@ const JoinButton = () => {
     };
   
     return (
-      <button onClick={joinRoom}>Start New Meeting</button>
+      <button onClick={joinRoom}>join Meeting</button>
     );
   };
   

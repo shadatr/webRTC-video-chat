@@ -4,8 +4,8 @@ import Peer from "peerjs";
 import { createContext, useEffect, useState, useReducer } from "react";
 import socketIOClient from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
-import { PeerReducer } from "../reducers/peerReducer";
-import { addPeerAction, removePeerAction } from "../reducers/PeerActions";
+import { peersReducer } from "../reducers/peerReducer";
+import { IPeer, addAllPeersAction, addPeerStreamAction, removePeerStreamAction } from "../reducers/PeerActions";
 import { IMessage } from "@/types/chat";
 import { chatReducer } from "@/reducers/chatReducer";
 import { addHistoryAction, addMessageAction } from "@/reducers/chatActions";
@@ -22,41 +22,48 @@ export const RoomProvider = ({
   const router = useRouter();
   const [me, setMe] = useState<Peer>();
   const [stream, setStream] = useState<MediaStream>();
-  const [peers, dispatch] = useReducer(PeerReducer, {});
+  const [peers, dispatch] = useReducer(peersReducer, {});
   const [chat, chatDispatch] = useReducer(chatReducer, {
     messages: [],
     isChatOpen: false,
-})
+  });
+
   const enterRoom = ({ roomId }: { roomId: string }) => {
     console.log(`Entered room ${roomId}`);
     router.replace(`/room/${roomId}`);
   };
-  const getUsers = ({ participants }: { participants: string[] }) => {
-    console.log("Participants", participants);
+
+  const getUsers = ({
+    participants,
+  }: {
+    participants: Record<string, IPeer>;
+  }) => {
+    dispatch(addAllPeersAction(participants));
+            console.log("get users", participants);
+
   };
 
   const removePeer = (peerId: string) => {
-    dispatch(removePeerAction(peerId));
+    dispatch(removePeerStreamAction(peerId));
   };
 
   const sendMessage = (message: string, roomId: string, author: string) => {
     const messageData: IMessage = {
-        content: message,
-        timestamp: new Date().getTime(),
-        author,
+      content: message,
+      timestamp: new Date().getTime(),
+      author,
     };
     chatDispatch(addMessageAction(messageData));
-
     ws.emit("send-message", roomId, messageData);
-};
+  };
 
-const addMessage = (message: IMessage) => {
+  const addMessage = (message: IMessage) => {
     chatDispatch(addMessageAction(message));
-};
+  };
 
-const addHistory = (messages: IMessage[]) => {
+  const addHistory = (messages: IMessage[]) => {
     chatDispatch(addHistoryAction(messages));
-};
+  };
 
   useEffect(() => {
     const meId = uuidv4();
@@ -80,42 +87,45 @@ const addHistory = (messages: IMessage[]) => {
     ws.on("get-messages", addHistory);
 
     return () => {
-        ws.off("room-created");
-        ws.off("get-users");
-        ws.off("user-disconnected");
-        ws.off("user-joined");
-        ws.off("add-message", addMessage);
-        ws.off("get-messages", addHistory);
-        }
+      ws.off("room-created", enterRoom);
+      ws.off("get-users", getUsers);
+      ws.off("user-disconnected", removePeer);
+      ws.off("add-message", addMessage);
+      ws.off("get-messages", addHistory);
+    };
   }, []);
 
   useEffect(() => {
-    if (!me) return;
-    if (!stream) return;
-    ws.on("user-joined", ({ peerId }: { peerId: string }) => {
-      const call = me.call(peerId, stream);
-      call.on("stream", (stream) => {
-        dispatch(addPeerAction(peerId, stream));
-      });
+    if (!me || !stream) return;
+  
+    ws.on("user-joined", ({ peerId, roomId, stream: newUserStream }: { peerId: string; roomId: string; stream: MediaStream }) => {
+      if (newUserStream instanceof MediaStream) {
+        dispatch(addPeerStreamAction(peerId, newUserStream));
+      } else {
+        console.error("Stream is not an instance of MediaStream.");
+      }
     });
-
+  
     me.on("call", (call) => {
       call.answer(stream);
-      call.on("stream", (stream) => {
-        dispatch(addPeerAction(call.peer, stream));
+      call.on("stream", (remoteStream) => {
+        if (remoteStream instanceof MediaStream) {
+          dispatch(addPeerStreamAction(call.peer, remoteStream));
+        } else {
+          console.error("Remote stream is not an instance of MediaStream.");
+        }
       });
     });
-
+  
     return () => {
       ws.off("user-joined");
-
     };
   }, [me, stream]);
-
-  console.log("chat", { chat });
+  
+  
 
   return (
-    <RoomContext.Provider value={{ ws, me, stream, peers, sendMessage,chat }}>
+    <RoomContext.Provider value={{ ws, me, stream, peers, sendMessage, chat }}>
       {children}
     </RoomContext.Provider>
   );
