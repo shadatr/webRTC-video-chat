@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { RoomProvider } from "@/context/RoomContext";
+import { UserProvider } from "@/context/UserContext";
+import { ChatProvider } from "@/context/ChatContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,7 +20,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <RoomProvider>{children}</RoomProvider>
+        <RoomProvider>
+          <UserProvider>
+        <ChatProvider>
+
+          {children}
+        </ChatProvider>
+          </UserProvider>
+          </RoomProvider>
       </body>
     </html>
   );

@@ -1,11 +1,11 @@
 import { useContext } from "react";
-import { IMessage } from "../../types/chat";
+import { ChatContext } from "../../context/ChatContext";
 import { ChatBubble } from "./ChatBubble";
 import { ChatInput } from "./ChatInput";
-import { RoomContext } from "@/context/RoomContext";
+import { IMessage } from "@/types/chat";
 
 export const Chat: React.FC = () => {
-    const { chat } = useContext(RoomContext);
+    const { chat } = useContext(ChatContext);
 
     return (
         <div
@@ -13,7 +13,7 @@ export const Chat: React.FC = () => {
             data-testid="chat"
         >
             <div>
-                {chat.messages?.map((message: IMessage) => (
+                {chat.messages.map((message: IMessage) => (
                     <ChatBubble
                         message={message}
                         key={

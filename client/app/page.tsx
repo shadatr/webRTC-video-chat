@@ -1,13 +1,14 @@
 'use client'
-import CreateButton from "@/components/CreateButton";
-import JoinButton from "@/components/joinButton";
+
+import { Join } from "@/components/Join";
+
 
 export default function Home() {
 
   return (
     <div>
-     <CreateButton />
-     <JoinButton />
+      
+     <Join />
     </div>
   );
 }

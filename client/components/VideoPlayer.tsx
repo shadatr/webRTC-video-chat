@@ -5,21 +5,14 @@ export const VideoPlayer: React.FC<{ stream?: MediaStream }> = ({ stream }) => {
 
     useEffect(() => {
         if (videoRef.current) {
-            if (stream instanceof MediaStream) {
+            if (stream && stream instanceof MediaStream) {
                 videoRef.current.srcObject = stream;
             } else {
-                console.error("Provided stream is not a MediaStream.", stream);
+                console.warn("Invalid stream provided", stream);
             }
         }
     }, [stream]);
 
-    return (
-        <video
-            data-testid="peer-video"
-            style={{ width: "100%" }}
-            ref={videoRef}
-            autoPlay
-            muted={true}
-        />
-    );
+    return <video ref={videoRef} autoPlay playsInline />;
+    
 };
