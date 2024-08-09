@@ -20,6 +20,7 @@ interface IMessage {
     author?: string;
     timestamp: number;
 }
+
 export const roomHandler = (socket: Socket) => {
     const createRoom = () => {
         const roomId = uuidV4();
@@ -27,29 +28,14 @@ export const roomHandler = (socket: Socket) => {
         socket.emit("room-created", { roomId });
         console.log("user created the room");
     };
-
-    const joinRoom = (data: IJoinRoomParams) => {
-        if (!data) {
-            console.error("No data provided for joinRoom");
-            socket.emit("error", { message: "Invalid join room data" });
-            return;
-        }
-
-        const { roomId, peerId, userName } = data;
-
-        if (!roomId || !peerId || !userName) {
-            console.error("Missing roomId, peerId, or userName in joinRoom data");
-            socket.emit("error", { message: "Missing required fields" });
-            return;
-        }
-
+    const joinRoom = ({ roomId, peerId, userName }: IJoinRoomParams) => {
         if (!rooms[roomId]) rooms[roomId] = {};
         if (!chats[roomId]) chats[roomId] = [];
         socket.emit("get-messages", chats[roomId]);
-        socket.join(roomId);
-        rooms[roomId][peerId] = { peerId, userName };
-        socket.to(roomId).emit("user-joined", { peerId, userName });
         console.log("user joined the room", roomId, peerId, userName);
+        rooms[roomId][peerId] = { peerId, userName };
+        socket.join(roomId);
+        socket.to(roomId).emit("user-joined", { peerId, userName });
         socket.emit("get-users", {
             roomId,
             participants: rooms[roomId],
@@ -62,12 +48,12 @@ export const roomHandler = (socket: Socket) => {
     };
 
     const leaveRoom = ({ peerId, roomId }: IRoomParams) => {
-        if (!rooms[roomId]) return;
-        delete rooms[roomId][peerId];
+        // rooms[roomId] = rooms[roomId]?.filter((id) => id !== peerId);
         socket.to(roomId).emit("user-disconnected", peerId);
     };
 
     const startSharing = ({ peerId, roomId }: IRoomParams) => {
+        console.log({ roomId, peerId });
         socket.to(roomId).emit("user-started-sharing", peerId);
     };
 
@@ -76,8 +62,12 @@ export const roomHandler = (socket: Socket) => {
     };
 
     const addMessage = (roomId: string, message: IMessage) => {
-        if (!chats[roomId]) chats[roomId] = [];
-        chats[roomId].push(message);
+        console.log({ message });
+        if (chats[roomId]) {
+            chats[roomId].push(message);
+        } else {
+            chats[roomId] = [message];
+        }
         socket.to(roomId).emit("add-message", message);
     };
 
@@ -95,7 +85,6 @@ export const roomHandler = (socket: Socket) => {
             socket.to(roomId).emit("name-changed", { peerId, userName });
         }
     };
-
     socket.on("create-room", createRoom);
     socket.on("join-room", joinRoom);
     socket.on("start-sharing", startSharing);
