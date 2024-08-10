@@ -26,16 +26,19 @@ export const roomHandler = (socket: Socket) => {
         const roomId = uuidV4();
         rooms[roomId] = {};
         socket.emit("room-created", { roomId });
-        console.log("user created the room");
     };
+    
     const joinRoom = ({ roomId, peerId, userName }: IJoinRoomParams) => {
-        if (!rooms[roomId]) rooms[roomId] = {};
+        if (!rooms[roomId]) {
+            // Emit an error message if the room doesn't exist
+            socket.emit("error", { message: "Room does not exist" });
+            return; 
+        }
         if (!chats[roomId]) chats[roomId] = [];
         socket.emit("get-messages", chats[roomId]);
-        console.log("user joined the room", roomId, peerId, userName);
         rooms[roomId][peerId] = { peerId, userName };
         socket.join(roomId);
-        socket.to(roomId).emit("user-joined", { peerId, userName });
+        socket.to(roomId).emit("user-joined", { peerId, userName,roomId });
         socket.emit("get-users", {
             roomId,
             participants: rooms[roomId],

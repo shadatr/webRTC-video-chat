@@ -8,28 +8,33 @@ import { Home } from "./pages/Home";
 import { Room } from "./pages/Room";
 import { UserProvider } from "./context/UserContext";
 import { ChatProvider } from "./context/ChatContext";
+import { Create } from "./pages/create";
+import { Toaster } from "sonner";
 
 ReactDOM.render(
-    <React.StrictMode>
-        <BrowserRouter>
-            <UserProvider>
-                <RoomProvider>
-                    <Routes>
-                        <Route path="/" element={<Home />} />
-                        <Route
-                            path="/room/:id"
-                            element={
-                                <ChatProvider>
-                                    <Room />
-                                </ChatProvider>
-                            }
-                        />
-                    </Routes>
-                </RoomProvider>
-            </UserProvider>
-        </BrowserRouter>
-    </React.StrictMode>,
-    document.getElementById("root")
+  <React.StrictMode>
+    <BrowserRouter>
+      <UserProvider>
+        <RoomProvider>
+          <img src="/SyncTalk.png" className="m-5" alt="logo" />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/create" element={<Create />} />
+            <Route
+              path="/room/:id"
+              element={
+                <ChatProvider>
+                  <Room />
+                </ChatProvider>
+              }
+            />
+          </Routes>
+          <Toaster richColors duration={3000} />
+        </RoomProvider>
+      </UserProvider>
+    </BrowserRouter>
+  </React.StrictMode>,
+  document.getElementById("root")
 );
 
 // If you want to start measuring performance in your app, pass a function

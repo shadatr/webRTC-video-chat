@@ -15,7 +15,6 @@ import {
     removePeerStreamAction,
     addAllPeersAction,
 } from "../reducers/peerActions";
-
 import { UserContext } from "./UserContext";
 import { IPeer } from "../types/peer";
 
@@ -54,6 +53,7 @@ export const RoomProvider: React.FunctionComponent = ({ children }) => {
     const enterRoom = ({ roomId }: { roomId: "string" }) => {
         navigate(`/room/${roomId}`);
     };
+
     const getUsers = ({
         participants,
     }: {
@@ -156,16 +156,12 @@ export const RoomProvider: React.FunctionComponent = ({ children }) => {
     useEffect(() => {
         if (!me) return;
         if (!stream) return;
-        if (!ws) {
-            console.error("WebSocket instance is not defined");
-            return;
-        }
+        if (!ws) return
+
     
-        if (!me) {
-            console.error("Peer instance is not defined");
-            return;
-        }
-        ws.on("user-joined", ({ peerId, userName: name }) => {
+        ws.on("user-joined", ({ peerId, userName: name ,roomId}) => {
+            console.log("user joined", roomId);
+
             const call = me.call(peerId, stream, {
                 metadata: {
                     userName,
@@ -175,7 +171,31 @@ export const RoomProvider: React.FunctionComponent = ({ children }) => {
                 dispatch(addPeerStreamAction(peerId, peerStream));
             });
             dispatch(addPeerNameAction(peerId, name));
+
         });
+
+        // const handleUserJoined = ({ peerId, userName: name, roomId }:{peerId:string,userName:string, roomId:string}) => {
+        //     console.log("User joined", { peerId, name, roomId });
+
+        //     if (!roomId) {
+        //         console.error("Invalid roomId:", roomId);
+        //         return;
+        //     }
+
+        //     const call = me.call(peerId, stream, {
+        //         metadata: {
+        //             userName,
+        //         },
+        //     });
+        //     call.on("stream", (peerStream) => {
+        //         dispatch(addPeerStreamAction(peerId, peerStream));
+        //     });
+        //     dispatch(addPeerNameAction(peerId, name));
+        //     navigate(`/room/${roomId}`);
+        // };
+
+        // // Attach event listeners
+        // ws.on("user-joined", handleUserJoined);
 
         me.on("call", (call) => {
             const { userName } = call.metadata;
