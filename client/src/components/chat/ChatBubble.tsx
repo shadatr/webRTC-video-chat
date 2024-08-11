@@ -21,8 +21,8 @@ export const ChatBubble: React.FC<{ message: IMessage }> = ({ message }) => {
             <div className="flex flex-col">
                 <div
                     className={classNames("inline-block py-2 px-4 rounded", {
-                        "bg-red-200": isSelf,
-                        "bg-red-300": !isSelf,
+                        "bg-blue-200": isSelf,
+                        "bg-blue-400": !isSelf,
                     })}
                 >
                     {message.content}
