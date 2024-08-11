@@ -9,7 +9,7 @@ export const VideoPlayer: React.FC<{ stream?: MediaStream }> = ({ stream }) => {
     return (
         <video
             data-testid="peer-video"
-            style={{ width: "100%" }}
+            className="rounded-lg w-full h-full"
             ref={videoRef}
             autoPlay
             muted={true}

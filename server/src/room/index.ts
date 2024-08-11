@@ -27,12 +27,12 @@ export const roomHandler = (socket: Socket) => {
         rooms[roomId] = {};
         socket.emit("room-created", { roomId });
     };
-    
+
     const joinRoom = ({ roomId, peerId, userName }: IJoinRoomParams) => {
         if (!rooms[roomId]) {
             // Emit an error message if the room doesn't exist
             socket.emit("error", { message: "Room does not exist" });
-            return; 
+            return;
         }
         if (!chats[roomId]) chats[roomId] = [];
         socket.emit("get-messages", chats[roomId]);
@@ -51,12 +51,10 @@ export const roomHandler = (socket: Socket) => {
     };
 
     const leaveRoom = ({ peerId, roomId }: IRoomParams) => {
-        // rooms[roomId] = rooms[roomId]?.filter((id) => id !== peerId);
         socket.to(roomId).emit("user-disconnected", peerId);
     };
 
     const startSharing = ({ peerId, roomId }: IRoomParams) => {
-        console.log({ roomId, peerId });
         socket.to(roomId).emit("user-started-sharing", peerId);
     };
 
@@ -65,7 +63,6 @@ export const roomHandler = (socket: Socket) => {
     };
 
     const addMessage = (roomId: string, message: IMessage) => {
-        console.log({ message });
         if (chats[roomId]) {
             chats[roomId].push(message);
         } else {

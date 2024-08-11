@@ -16,7 +16,6 @@ ReactDOM.render(
     <BrowserRouter>
       <UserProvider>
         <RoomProvider>
-          <img src="/SyncTalk.png" className="m-5" alt="logo" />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/create" element={<Create />} />
