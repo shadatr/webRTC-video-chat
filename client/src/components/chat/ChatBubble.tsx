@@ -7,10 +7,15 @@ import { UserContext } from "../../context/UserContext";
 export const ChatBubble: React.FC<{ message: IMessage }> = ({ message }) => {
     const { peers } = useContext(RoomContext);
     const { userId } = useContext(UserContext);
-    const author = message.author && peers[message.author].userName;
-    const userName = author || "Anonimus";
+
+    // Safely access the author's userName
+    const author = message.author && peers[message.author] ? peers[message.author].userName : undefined;
+    const userName = author || "Anonymous"; 
     const isSelf = message.author === userId;
     const time = new Date(message.timestamp).toLocaleTimeString();
+
+    console.log("userId", userId);
+
     return (
         <div
             className={classNames("m-2 flex", {
@@ -18,9 +23,9 @@ export const ChatBubble: React.FC<{ message: IMessage }> = ({ message }) => {
                 "pr-10 justify-start": !isSelf,
             })}
         >
-            <div className="flex flex-col">
+            <div className="flex flex-col max-w-[300px]">
                 <div
-                    className={classNames("inline-block py-2 px-4 rounded", {
+                    className={classNames("py-2 px-4 rounded", {
                         "bg-blue-200": isSelf,
                         "bg-blue-400": !isSelf,
                     })}
@@ -36,7 +41,7 @@ export const ChatBubble: React.FC<{ message: IMessage }> = ({ message }) => {
                     </div>
                 </div>
                 <div
-                    className={classNames("text-md", {
+                    className={classNames("font-semibold", {
                         "text-right": isSelf,
                         "text-left": !isSelf,
                     })}

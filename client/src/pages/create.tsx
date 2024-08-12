@@ -1,19 +1,22 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { ws } from "../ws";
 import { UserContext } from "../context/UserContext";
 import { toast } from "sonner";
+import { RoomContext } from "../context/RoomContext";
 
 export const Create = () => {
     const { userName, setUserName } = useContext(UserContext);
+    const { setMeetingName, meetingName } = useContext(RoomContext);
+
 
     const createRoom = () => {
         if (!userName) {
             toast.error("Please enter your name");
             return;
           }
-        ws.emit("create-room");
+        ws.emit("create-room", { meetingName });  
     };
-    
+
     return (
         <div className=" flex justify-center items-center gap-16 h-[40vw]">
       <div className="flex flex-col w-[600px] gap-5">
@@ -32,6 +35,12 @@ export const Create = () => {
           placeholder="Enter your name"
           onChange={(e) => setUserName(e.target.value)}
           value={userName}
+        />
+      <input
+          className="border border-blue-200 rounded-md py-2 px-4 w-full"
+          placeholder="Enter room title"
+          onChange={(e) => setMeetingName(e.target.value)}
+          value={meetingName}
         />
      
         <button

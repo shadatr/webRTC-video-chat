@@ -19,7 +19,10 @@ import { UserContext } from "./UserContext";
 import { IPeer } from "../types/peer";
 
 interface RoomValue {
+    meetingName: string;
+    setMeetingName: (name: string) =>void;
     stream?: MediaStream;
+    setStream: (stream: MediaStream|undefined) => void;
     screenStream?: MediaStream;
     peers: PeerState;
     shareScreen: () => void;
@@ -29,6 +32,9 @@ interface RoomValue {
 }
 
 export const RoomContext = createContext<RoomValue>({
+    meetingName: "",
+    setMeetingName: (name) => {},
+    setStream: () => {},
     peers: {},
     shareScreen: () => {},
     setRoomId: (id) => {},
@@ -44,13 +50,14 @@ export const RoomProvider: React.FunctionComponent = ({ children }) => {
     const navigate = useNavigate();
     const { userName, userId } = useContext(UserContext);
     const [me, setMe] = useState<Peer>();
-    const [stream, setStream] = useState<MediaStream>();
+    const [stream, setStream] = useState<MediaStream|undefined>();
     const [screenStream, setScreenStream] = useState<MediaStream>();
     const [peers, dispatch] = useReducer(peersReducer, {});
     const [screenSharingId, setScreenSharingId] = useState<string>("");
     const [roomId, setRoomId] = useState<string>("");
+    const [meetingName, setMeetingName] = useState(localStorage.getItem("meetingname") || "");
 
-    const enterRoom = ({ roomId }: { roomId: "string" }) => {
+    const enterRoom = ({ roomId,meetingName }: { roomId: "string",meetingName:"string" }) => {
         navigate(`/room/${roomId}`);
     };
 
@@ -108,10 +115,15 @@ export const RoomProvider: React.FunctionComponent = ({ children }) => {
     }, [userName, userId, roomId]);
 
     useEffect(() => {
+        localStorage.setItem("meetingname", meetingName);
+    }, [meetingName]);
+
+    useEffect(() => {
         // const peer = new Peer(userId, {
         //     host: "peerjs.webrtctest.online",
         //     path: "/",
         // });
+
         const peer = new Peer(userId);
         setMe(peer);
 
@@ -216,7 +228,10 @@ export const RoomProvider: React.FunctionComponent = ({ children }) => {
     return (
         <RoomContext.Provider
             value={{
+                setMeetingName,
+                meetingName,
                 stream,
+                setStream,
                 screenStream,
                 peers,
                 shareScreen,

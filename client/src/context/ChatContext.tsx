@@ -24,7 +24,7 @@ export const ChatContext = createContext<ChatValue>({
 export const ChatProvider: React.FC = ({ children }) => {
     const [chat, chatDispatch] = useReducer(chatReducer, {
         messages: [],
-        isChatOpen: false,
+        isChatOpen: true,
     });
 
     const sendMessage = (message: string, roomId: string, author: string) => {
@@ -57,6 +57,7 @@ export const ChatProvider: React.FC = ({ children }) => {
             ws.off("get-messages", addHistory);
         };
     }, []);
+
     return (
         <ChatContext.Provider
             value={{
